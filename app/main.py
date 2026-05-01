@@ -1,7 +1,16 @@
+import os
+# Limit threads to reduce memory overhead
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
 import logging
 from fastapi import FastAPI
 import uvicorn
+import torch
 from contextlib import asynccontextmanager
+
+# Limit PyTorch memory footprint
+torch.set_num_threads(1)
 
 from app.services.recommendation import RecommendationService
 from app.api.endpoints import router

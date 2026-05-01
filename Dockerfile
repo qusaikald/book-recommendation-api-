@@ -4,6 +4,9 @@ FROM python:3.12-slim
 # Set the working directory in the container
 WORKDIR /app
 
+# Optimize memory usage for Python
+ENV MALLOC_ARENA_MAX=2
+
 # Install system dependencies required by FAISS and ML libraries
 RUN apt-get update && apt-get install -y \
     libomp-dev \
