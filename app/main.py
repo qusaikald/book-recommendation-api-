@@ -1,0 +1,37 @@
+import logging
+from fastapi import FastAPI
+import uvicorn
+from contextlib import asynccontextmanager
+
+from app.services.recommendation import RecommendationService
+from app.api.endpoints import router
+
+# Configure logging for production
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Load FAISS index once
+    logger.info("Loading Recommendation System...")
+    service = RecommendationService()
+    service.load_data()
+    service.initialize_model()
+    # We load from disk by default
+    service.load_index(force_rebuild=False)
+    
+    app.state.reco_service = service
+    logger.info("System ready!")
+    yield
+    # Shutdown logic if any
+    logger.info("Shutting down...")
+
+app = FastAPI(title="Book Recommendation API", lifespan=lifespan)
+
+app.include_router(router)
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
