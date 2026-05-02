@@ -7,6 +7,7 @@ import logging
 from fastapi import FastAPI
 import uvicorn
 import torch
+import gc
 from contextlib import asynccontextmanager
 
 # Limit PyTorch memory footprint
@@ -28,9 +29,12 @@ async def lifespan(app: FastAPI):
     logger.info("Loading Recommendation System...")
     service = RecommendationService()
     service.load_data()
+    gc.collect()
     service.initialize_model()
+    gc.collect()
     # We load from disk by default
     service.load_index(force_rebuild=False)
+    gc.collect()
     
     app.state.reco_service = service
     logger.info("System ready!")

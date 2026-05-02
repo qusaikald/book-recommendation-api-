@@ -20,6 +20,10 @@ COPY requirements.txt .
 # Install Python dependencies globally within the container using uv
 RUN uv pip install --system --no-cache -r requirements.txt
 
+# Pre-download the HuggingFace model into the Docker image
+# This saves memory at runtime by preventing the download stream from spiking RAM
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-small-en-v1.5')"
+
 # Copy the rest of your application code
 COPY . .
 
